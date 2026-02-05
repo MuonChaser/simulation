@@ -46,3 +46,10 @@ g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
   theme(legend.position = "none")
 
 ggsave("j_40_n_60.png", plot = g, width = 8, height = 6)
+
+data = assign_strata(data)
+
+prop_table <- aggregate(D ~ B + id, data = data, FUN = mean)
+names(prop_table) <- c("K", "id", "接受处理比例")
+print(prop_table)
+

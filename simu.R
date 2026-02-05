@@ -8,7 +8,7 @@ library(doRNG)
 
 # source("gen_data.R")
 
-N_simu = 1000
+N_simu = 100
 
 # 注册并行后端
 n_cores <- parallel::detectCores() - 1

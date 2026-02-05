@@ -11,8 +11,8 @@ data$B <- rep(1:K, each = n.avg/K, times = J)
 
 
 
-tau_a0_k <- rt(K, df = 2)
-tau_a1_k <- rt(K, df = 2) + tau_a0_k
+tau_a0_k <- rt(K, df = 3)
+tau_a1_k <- rt(K, df = 3) + tau_a0_k
 
 data$y_d0_a0 <- rnorm(N)
 data$y_d1_a0 <- data$y_d0_a0 + tau_a0_k[data$B] + rnorm(N)
