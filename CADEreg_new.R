@@ -124,20 +124,23 @@ CADEreg_new=function(data){
   }
   ## Drop last stratum to avoid collinearity (sum of Pi columns = 0)
   Pi=Pi.full[,2:K,drop=FALSE]
-
+  
   X= cbind(A.reg, 1-A.reg,  Z.reg*A.reg, Z.reg*(1-A.reg),
-           Pi*A.reg, Pi*(1-A.reg))
+           Pi*A.reg, Pi*(1-A.reg),
+           Pi*Z.reg*A.reg, Pi*Z.reg*(1-A.reg))
 
   reg1s=lm(D.reg~0+X,weights=W)
   D.hat=as.vector(fitted(reg1s))
 
   M= cbind(A.reg, 1-A.reg,  D.hat*A.reg, D.hat*(1-A.reg),
-           Pi*A.reg, Pi*(1-A.reg))
+           Pi*A.reg, Pi*(1-A.reg),
+           Pi*Z.reg*A.reg, Pi*Z.reg*(1-A.reg))
   reg2s=lm(Y.reg~0+M,weights=as.vector(W))
   res= Y.reg-cbind(A.reg, 1-A.reg,  D.reg*A.reg, D.reg*(1-A.reg),
-                    Pi*A.reg, Pi*(1-A.reg))%*%reg2s$coefficients
+                    Pi*A.reg, Pi*(1-A.reg),
+                    Pi*Z.reg*A.reg, Pi*Z.reg*(1-A.reg))%*%reg2s$coefficients
   ###  variance
-  p=4+2*(K-1)
+  p=4+4*(K-1)
 
   ## cluster robust variance
   MM=t(M)%*%diag(W)%*%M
@@ -148,12 +151,14 @@ CADEreg_new=function(data){
     Mj= M[index,]
     if (A[j]==1){
       Sj=cbind(W[index],   0, W[index]*D.hat[index], 0,
-               W[index]*Pi[index,,drop=FALSE], matrix(0,nrow=length(index),ncol=K-1))
+               W[index]*Pi[index,,drop=FALSE], matrix(0,nrow=length(index),ncol=K-1),
+               W[index]*Pi[index,,drop=FALSE]*Z.reg[index], matrix(0,nrow=length(index),ncol=K-1))
 
       var.cluster.med=var.cluster.med+t(Sj)%*%res[index] %*%t(t(Sj)%*%res[index])
     }else{
       Sj=cbind(0, W[index],   0, W[index]*D.hat[index],
-               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE])
+               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE],
+               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE]*Z.reg[index])
 
       var.cluster.med=var.cluster.med+t(Sj)%*%res[index] %*%t(t(Sj)%*%res[index])
 
@@ -171,12 +176,14 @@ CADEreg_new=function(data){
     Mj= M[index,]
     if (A[j]==1){
       Sj=cbind(W[index],   0, W[index]*D.hat[index], 0,
-               W[index]*Pi[index,,drop=FALSE], matrix(0,nrow=length(index),ncol=K-1))*sqrt(J1/(J1-1))
+               W[index]*Pi[index,,drop=FALSE], matrix(0,nrow=length(index),ncol=K-1),
+               W[index]*Pi[index,,drop=FALSE]*Z.reg[index], matrix(0,nrow=length(index),ncol=K-1))*sqrt(J1/(J1-1))
 
       var.cluster.med=var.cluster.med+t(Sj)%*%res[index] %*%t(t(Sj)%*%res[index])
     }else{
       Sj=cbind(0, W[index],   0, W[index]*D.hat[index],
-               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE])*sqrt((J-J1)/(J-J1-1))
+               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE],
+               matrix(0,nrow=length(index),ncol=K-1), W[index]*Pi[index,,drop=FALSE]*Z.reg[index])*sqrt((J-J1)/(J-J1-1))
 
       var.cluster.med=var.cluster.med+t(Sj)%*%res[index] %*%t(t(Sj)%*%res[index])
 

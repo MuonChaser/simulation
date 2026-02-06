@@ -8,10 +8,11 @@ library(doRNG)
 
 # source("gen_data.R")
 
-N_simu = 100
+N_simu = 10000
+set.seed(123)
 
 # 注册并行后端
-n_cores <- parallel::detectCores() - 1
+n_cores <- 100*parallel::detectCores() - 1
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
 

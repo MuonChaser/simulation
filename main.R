@@ -1,6 +1,11 @@
 J=10
 n.avg=20
 source("gen_data.R")
+data <- assign_strata(data)
+CADEreg_new(data)
+
+
+
 source("simu.R")
 g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
   ylim(-5, 5) +
@@ -13,6 +18,19 @@ g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
   theme(legend.position = "none")
 
 ggsave("j_10_n_20.png", plot = g, width = 8, height = 6)
+
+# 绘制小提琴图
+g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
+  ylim(-5, 5) +
+  geom_violin(trim = FALSE) +
+  facet_wrap(~ A) +
+  theme_minimal() +
+  labs(title = "Bias Distribution by Method and A Level",
+       x = "Method",
+       y = "Bias") +
+  theme(legend.position = "none")
+
+ggsave("j_10_n_20_violin.png", plot = g, width = 8, height = 6)
 
 J=20
 n.avg=40
@@ -31,6 +49,18 @@ g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
 
 ggsave("j_20_n_40.png", plot = g, width = 8, height = 6)
 
+g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
+  ylim(-5, 5) +
+  geom_violin(trim = FALSE) +
+  facet_wrap(~ A) +
+  theme_minimal() +
+  labs(title = "Bias Distribution by Method and A Level",
+       x = "Method",
+       y = "Bias") +
+  theme(legend.position = "none")
+
+ggsave("j_20_n_40_violin.png", plot = g, width = 8, height = 6)
+
 J=40
 n.avg=60
 source("gen_data.R")
@@ -47,9 +77,15 @@ g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
 
 ggsave("j_40_n_60.png", plot = g, width = 8, height = 6)
 
-data = assign_strata(data)
+g <- ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
+  ylim(-5, 5) +
+  geom_violin(trim = FALSE) +
+  facet_wrap(~ A) +
+  theme_minimal() +
+  labs(title = "Bias Distribution by Method and A Level",
+       x = "Method",
+       y = "Bias") +
+  theme(legend.position = "none")
 
-prop_table <- aggregate(D ~ B + id, data = data, FUN = mean)
-names(prop_table) <- c("K", "id", "接受处理比例")
-print(prop_table)
+ggsave("j_40_n_60_violin.png", plot = g, width = 8, height = 6)
 
