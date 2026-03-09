@@ -1,3 +1,9 @@
 .DS_Store
 归档.zip
 *.png
+*.rds
+*.rds.zip
+old/
+*.csv
+*.bak
+ref/
