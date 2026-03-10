@@ -11,14 +11,15 @@
 ##   DEY(a)     = (1/J_a) * sum_{j: A_j=a} DEY_j(a)
 ##   CADE(a)    = DEY(a) / DED(a)
 
-source("CADEreg_new.R")
-source("assign.R")
+source("../CADEreg_new.R")
+source("../assign.R")
+source("../gen_data.R")
 
 set.seed(42)
 
 ## --- 1. Generate population data ---
-J <- 10; K <- 4; n_jk <- 20
-source("gen_data.R")   # uses J, K, n_jk; sets: data, N, n.avg, cade_a0, cade_a1
+pop  <- gen_data(J = 10, K = 4, n_jk = 20)
+data <- pop$data
 
 ## --- 2. Assign treatment for one replication ---
 obs <- assign_strata(data)

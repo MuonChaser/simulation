@@ -6,4 +6,7 @@
 old/
 *.csv
 *.bak
+*.RData
 ref/
+paper/
+results/
