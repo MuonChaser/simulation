@@ -26,7 +26,7 @@ library(dplyr)
 library(tidyr)
 library(scales)
 
-N_simu <- 100   # 论文使用 10,000；调试时可改小
+N_simu <- 10000   # 论文使用 10,000；调试时可改小
 set.seed(2026)
 
 # ---- 单组实验函数 ----
@@ -39,6 +39,7 @@ run_experiment <- function(K_val, n_jk_val, J_val, label_val) {
   pop     <- gen_data(J_val, K_val, n_jk_val)
   results <- run_simu(pop$data, pop$cade_a0, pop$cade_a1, N_simu)
   stats   <- save_results(results, label_val)
+  cat("Finished:", label_val, "at", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
 
   stats
 }

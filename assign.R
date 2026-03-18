@@ -21,26 +21,28 @@ assign_strata <- function(data) {
   z_prop_high <- 0.7
   z_prop_low  <- 0.3
 
+  # 预计算各聚类的行索引，避免循环内重复 which()
+  idx_by_j <- split(seq_len(N), data$id)
+
   data$Z <- rep(0L, N)
   for (j in 1:J) {
-    idx_j <- which(data$id == j)
+    idx_j <- idx_by_j[[j]]
     B_j   <- data$B[idx_j]
-    prop  <- ifelse(A_j[j] == 1, z_prop_high, z_prop_low)
+    prop  <- if (A_j[j] == 1) z_prop_high else z_prop_low
     for (k in 1:K) {
       idx_jk  <- idx_j[B_j == k]
       n_treat <- round(prop * length(idx_jk))
-      data$Z[sample(idx_jk, n_treat)] <- 1L
+      if (n_treat > 0L) data$Z[sample(idx_jk, n_treat)] <- 1L
     }
   }
 
-  data$D <- ifelse(data$Z == 1 & data$A == 1, data$d_z1_a1,
-             ifelse(data$Z == 0 & data$A == 1, data$d_z0_a1,
-              ifelse(data$Z == 1 & data$A == 0, data$d_z1_a0,
-                                                data$d_z0_a0)))
-  data$Y <- ifelse(data$Z == 1 & data$A == 1, data$y_z1_a1,
-             ifelse(data$Z == 0 & data$A == 1, data$y_z0_a1,
-              ifelse(data$Z == 1 & data$A == 0, data$y_z1_a0,
-                                                data$y_z0_a0)))
+  # 矩阵列索引替代 4 层嵌套 ifelse
+  col_idx <- 1L + data$Z + 2L * data$A
+  d_mat   <- cbind(data$d_z0_a0, data$d_z1_a0, data$d_z0_a1, data$d_z1_a1)
+  y_mat   <- cbind(data$y_z0_a0, data$y_z1_a0, data$y_z0_a1, data$y_z1_a1)
+  rows    <- seq_len(N)
+  data$D  <- d_mat[cbind(rows, col_idx)]
+  data$Y  <- y_mat[cbind(rows, col_idx)]
   data
 }
 
@@ -56,21 +58,23 @@ assign_no_strata <- function(data) {
   z_prop_high <- 0.7
   z_prop_low  <- 0.3
 
+  # 预计算各聚类的行索引，避免循环内重复 which()
+  idx_by_j <- split(seq_len(N), data$id)
+
   data$Z <- rep(0L, N)
   for (j in 1:J) {
-    idx_j   <- which(data$id == j)
-    prop    <- ifelse(A_j[j] == 1, z_prop_high, z_prop_low)
+    idx_j   <- idx_by_j[[j]]
+    prop    <- if (A_j[j] == 1) z_prop_high else z_prop_low
     n_treat <- round(prop * length(idx_j))
     data$Z[sample(idx_j, n_treat)] <- 1L
   }
 
-  data$D <- ifelse(data$Z == 1 & data$A == 1, data$d_z1_a1,
-             ifelse(data$Z == 0 & data$A == 1, data$d_z0_a1,
-              ifelse(data$Z == 1 & data$A == 0, data$d_z1_a0,
-                                                data$d_z0_a0)))
-  data$Y <- ifelse(data$Z == 1 & data$A == 1, data$y_z1_a1,
-             ifelse(data$Z == 0 & data$A == 1, data$y_z0_a1,
-              ifelse(data$Z == 1 & data$A == 0, data$y_z1_a0,
-                                                data$y_z0_a0)))
+  # 矩阵列索引替代 4 层嵌套 ifelse
+  col_idx <- 1L + data$Z + 2L * data$A
+  d_mat   <- cbind(data$d_z0_a0, data$d_z1_a0, data$d_z0_a1, data$d_z1_a1)
+  y_mat   <- cbind(data$y_z0_a0, data$y_z1_a0, data$y_z0_a1, data$y_z1_a1)
+  rows    <- seq_len(N)
+  data$D  <- d_mat[cbind(rows, col_idx)]
+  data$Y  <- y_mat[cbind(rows, col_idx)]
   data
 }

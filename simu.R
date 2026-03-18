@@ -14,18 +14,33 @@
 #   CADEreg()        — 基准估计量（来自 experiment 包）
 
 run_simu <- function(data, cade_a0, cade_a1, N_simu) {
-  n_cores <- min(parallel::detectCores() - 1, 100)
-  cl      <- makeCluster(n_cores)
+  n_cores   <- min(parallel::detectCores() - 1, 120)
+  cl        <- makeCluster(n_cores)
   registerDoParallel(cl)
+  on.exit(stopCluster(cl), add = TRUE)
+
+  # 进度追踪：每完成一次 replication，worker 向文件追加一个字节
+  # 在另一个终端用以下命令监控:
+  #   watch -n 2 'printf "%d / N_simu\n" $(wc -c < /tmp/simu_progress.tick)'
+  tick_file <- "/tmp/simu_progress.tick"
+  file.create(tick_file, showWarnings = FALSE)
+  writeLines(character(0), tick_file)   # 清空
 
   cat(sprintf("Starting %d replications on %d cores ...\n", N_simu, n_cores))
+  cat(sprintf("  Progress: watch -n 2 'echo \"$(wc -c < %s) / %d done\"'\n",
+              tick_file, N_simu))
 
   results <- foreach(
-    i         = 1:N_simu,
-    .combine  = rbind,
-    .packages = "experiment",
-    .export   = c("assign_strata", "assign_no_strata", "CADEreg_new")
+    i             = 1:N_simu,
+    .combine      = rbind,
+    .multicombine = TRUE,
+    .maxcombine   = N_simu,
+    .packages     = "experiment",
+    .export       = c("assign_strata", "assign_no_strata", "CADEreg_new",
+                      "tick_file")
   ) %dorng% {
+    tryCatch(cat(".", file = tick_file, append = TRUE),
+             error = function(e) NULL)
     d_strata <- assign_strata(data)
     d_group  <- assign_no_strata(data)
     r_strata <- CADEreg_new(d_strata)
@@ -42,10 +57,8 @@ run_simu <- function(data, cade_a0, cade_a1, N_simu) {
     )
   }
 
-  stopCluster(cl)
   cat("Replications done.\n")
 
-  # rbind 单行时返回向量，需强制转为矩阵
   results <- matrix(results, ncol = 8)
   colnames(results) <- c(
     "bias_strata_a0", "bias_group_a0",
