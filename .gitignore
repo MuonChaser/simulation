@@ -7,3 +7,5 @@ old/
 *.RData
 ref/
 paper/
+results_*/
+empirical_data/

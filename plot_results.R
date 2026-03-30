@@ -92,7 +92,7 @@ long_df$param_label <- factor(long_df$param_label, levels = param_order)
 ##   → x-axis is "free per column" so each scenario column only shows
 ##     its own 3 parameter values (no staircase)
 ## ----------------------------------------------------------------
-fig1 <- ggplot(long_df, aes(x = param_label, y = bias, fill = Method)) +
+fig1 <- ggplot(long_df, aes(x = param_label, y = bias, fill = Method, colour = Method)) +
   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50",
              linewidth = 0.4) +
   geom_boxplot(
@@ -115,13 +115,9 @@ fig1 <- ggplot(long_df, aes(x = param_label, y = bias, fill = Method)) +
     )
   ) +
   scale_x_discrete(drop = TRUE) +
-  scale_fill_manual(
-    values = c("Stratified"   = "#2166ac",
-               "Unstratified" = "#d6604d"),
-    labels = c("Stratified"   = "Stratified (proposed)",
-               "Unstratified" = "Unstratified (benchmark)")
-  ) +
-  labs(x = NULL, y = "Bias", fill = NULL) +
+  scale_fill_manual(values = c("Stratified" = "white", "Unstratified" = "grey70")) +
+  scale_colour_manual(values = c("Stratified" = "black", "Unstratified" = "black")) +
+  labs(x = NULL, y = "Bias", fill = NULL, colour = NULL) +
   theme_bw(base_size = 10) +
   theme(
     panel.grid.major.x = element_blank(),
@@ -130,14 +126,53 @@ fig1 <- ggplot(long_df, aes(x = param_label, y = bias, fill = Method)) +
     strip.text.x       = element_text(size = 9),
     strip.text.y       = element_text(size = 9),
     axis.text.x        = element_text(size = 8.5),
-    legend.position    = "bottom",
-    legend.key.size    = unit(0.35, "cm"),
-    legend.text        = element_text(size = 9),
+    legend.position    = "none",
     plot.margin        = margin(4, 6, 2, 4)
   )
 
 ggsave("paper/simulation_bias.pdf", fig1, width = 8.5, height = 5.5, device = "pdf")
 cat("Saved: paper/simulation_bias.pdf\n")
+
+
+## ----------------------------------------------------------------
+## Figure 3: violin plot (same layout as Figure 1)
+## ----------------------------------------------------------------
+fig3 <- ggplot(long_df, aes(x = param_label, y = bias, fill = Method, colour = Method)) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50",
+             linewidth = 0.4) +
+  geom_violin(
+    position  = position_dodge(0.70),
+    width     = 0.65,
+    linewidth = 0.35,
+    trim      = TRUE
+  ) +
+  facet_grid(
+    Mechanism ~ scenario,
+    scales   = "free_x",
+    space    = "free_x",
+    labeller = labeller(
+      Mechanism = label_parsed,
+      scenario  = label_value
+    )
+  ) +
+  scale_x_discrete(drop = TRUE) +
+  scale_fill_manual(values = c("Stratified" = "white", "Unstratified" = "grey70")) +
+  scale_colour_manual(values = c("Stratified" = "black", "Unstratified" = "black")) +
+  labs(x = NULL, y = "Bias", fill = NULL, colour = NULL) +
+  theme_bw(base_size = 10) +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor   = element_blank(),
+    strip.background   = element_rect(fill = "grey92", colour = "grey70"),
+    strip.text.x       = element_text(size = 9),
+    strip.text.y       = element_text(size = 9),
+    axis.text.x        = element_text(size = 8.5),
+    legend.position    = "none",
+    plot.margin        = margin(4, 6, 2, 4)
+  )
+
+ggsave("paper/simulation_violin.pdf", fig3, width = 8.5, height = 5.5, device = "pdf")
+cat("Saved: paper/simulation_violin.pdf\n")
 
 
 ## ----------------------------------------------------------------
@@ -202,21 +237,9 @@ fig2 <- ggplot(sd_long,
     )
   ) +
   scale_x_discrete(drop = TRUE) +
-  scale_colour_manual(
-    values = c("Stratified"   = "#2166ac",
-               "Unstratified" = "#d6604d"),
-    labels = c("Stratified (proposed)", "Unstratified (benchmark)")
-  ) +
-  scale_linetype_manual(
-    values = c("Stratified"   = "solid",
-               "Unstratified" = "dashed"),
-    labels = c("Stratified (proposed)", "Unstratified (benchmark)")
-  ) +
-  scale_shape_manual(
-    values = c("Stratified"   = 16,
-               "Unstratified" = 17),
-    labels = c("Stratified (proposed)", "Unstratified (benchmark)")
-  ) +
+  scale_colour_manual(values = c("Stratified" = "black", "Unstratified" = "grey50")) +
+  scale_linetype_manual(values = c("Stratified" = "solid", "Unstratified" = "dashed")) +
+  scale_shape_manual(values = c("Stratified" = 16, "Unstratified" = 17)) +
   labs(x = NULL, y = NULL, colour = NULL, linetype = NULL, shape = NULL) +
   theme_bw(base_size = 10) +
   theme(
@@ -225,9 +248,7 @@ fig2 <- ggplot(sd_long,
     strip.text.y       = element_text(size = 9, angle = 0, hjust = 0),
     strip.text.x       = element_text(size = 8),
     axis.text.x        = element_text(size = 7.5),
-    legend.position    = "bottom",
-    legend.key.width   = unit(1.2, "cm"),
-    legend.text        = element_text(size = 9),
+    legend.position    = "none",
     plot.margin        = margin(4, 6, 2, 4)
   )
 
